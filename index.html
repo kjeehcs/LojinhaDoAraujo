@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lojinha do Araújo</title>
+<style>
+  :root{
+    --bg:#f5f5f7; --card:#fff; --ink:#1d1d1f; --muted:#6e6e73;
+    --brand:#2563eb; --brand-dark:#1d4ed8; --ok:#16a34a; --line:#e5e5ea;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{font-weight:800;font-size:1.3rem;display:flex;align-items:center;gap:8px}
+  .logo span{color:var(--brand)}
+  .search{flex:1;max-width:380px}
+  .search input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:999px;font-size:.95rem;outline:none;background:#fff}
+  .search input:focus{border-color:var(--brand)}
+  .cart-btn{position:relative;background:var(--brand);color:#fff;border:none;padding:10px 18px;border-radius:999px;font-weight:600;cursor:pointer;font-size:.95rem}
+  .cart-btn:hover{background:var(--brand-dark)}
+  .badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:.7rem;font-weight:700;min-width:20px;height:20px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+
+  .hero{max-width:1100px;margin:24px auto 0;padding:0 20px}
+  .hero-inner{background:linear-gradient(120deg,#2563eb,#7c3aed);color:#fff;border-radius:20px;padding:40px 32px}
+  .hero-inner h1{font-size:2rem;margin-bottom:8px}
+  .hero-inner p{opacity:.9}
+
+  main{max-width:1100px;margin:0 auto;padding:24px 20px 80px}
+  .cats{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+  .chip{padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer;font-size:.9rem;font-weight:500}
+  .chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+  .card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+  .thumb{font-size:3.5rem;height:140px;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+  .card .body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .card h3{font-size:1rem}
+  .card .cat{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .price{font-size:1.2rem;font-weight:700;margin-top:auto}
+  .add{background:var(--brand);color:#fff;border:none;padding:10px;border-radius:10px;font-weight:600;cursor:pointer}
+  .add:hover{background:var(--brand-dark)}
+
+  /* Cart drawer */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.2s;z-index:60}
+  .overlay.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:380px;max-width:90vw;background:#fff;z-index:70;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer header{position:static;background:#fff}
+  .drawer .dhead{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .drawer .dhead h2{font-size:1.2rem}
+  .close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted)}
+  .items{flex:1;overflow:auto;padding:12px 20px}
+  .empty{color:var(--muted);text-align:center;padding:40px 0}
+  .item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+  .item .ic{font-size:1.8rem}
+  .item .meta{flex:1}
+  .item .meta h4{font-size:.95rem}
+  .item .meta small{color:var(--muted)}
+  .qty{display:flex;align-items:center;gap:8px}
+  .qty button{width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-weight:700}
+  .dfoot{padding:18px 20px;border-top:1px solid var(--line)}
+  .total{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:700;margin-bottom:14px}
+  .checkout{width:100%;background:var(--ok);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:1rem;cursor:pointer}
+  .checkout:hover{filter:brightness(.95)}
+
+  footer{text-align:center;padding:30px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
+
+  @media(max-width:600px){.search{display:none}.hero-inner h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo">🛍️ Lojinha do <span>Araújo</span></div>
+    <div class="search"><input id="search" type="text" placeholder="Buscar produtos..."></div>
+    <button class="cart-btn" onclick="toggleCart(true)">Carrinho <span class="badge" id="badge">0</span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Ofertas que cabem no bolso 🎉</h1>
+    <p>Frete grátis acima de R$ 199 • Parcele em até 12x sem juros</p>
+  </div>
+</section>
+
+<main>
+  <div class="cats" id="cats"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>© 2026 Lojinha do Araújo • Feito com ❤️ • Pagamento 100% seguro</footer>
+
+<div class="overlay" id="overlay" onclick="toggleCart(false)"></div>
+<aside class="drawer" id="drawer">
+  <div class="dhead">
+    <h2>Seu Carrinho</h2>
+    <button class="close" onclick="toggleCart(false)">×</button>
+  </div>
+  <div class="items" id="items"></div>
+  <div class="dfoot">
+    <div class="total"><span>Total</span><span id="total">R$ 0,00</span></div>
+    <button class="checkout" onclick="checkout()">Finalizar Compra</button>
+  </div>
+</aside>
+
+<script>
+const PRODUCTS = [
+  {id:1, name:"Fone Bluetooth", cat:"Eletrônicos", price:149.90, icon:"🎧"},
+  {id:2, name:"Smartwatch Pro", cat:"Eletrônicos", price:399.00, icon:"⌚"},
+  {id:3, name:"Teclado Mecânico", cat:"Eletrônicos", price:289.90, icon:"⌨️"},
+  {id:4, name:"Camiseta Básica", cat:"Moda", price:59.90, icon:"👕"},
+  {id:5, name:"Tênis Esportivo", cat:"Moda", price:259.90, icon:"👟"},
+  {id:6, name:"Óculos de Sol", cat:"Moda", price:129.90, icon:"🕶️"},
+  {id:7, name:"Caneca Térmica", cat:"Casa", price:49.90, icon:"☕"},
+  {id:8, name:"Luminária LED", cat:"Casa", price:89.90, icon:"💡"},
+  {id:9, name:"Planta Decorativa", cat:"Casa", price:39.90, icon:"🪴"},
+  {id:10, name:"Café Especial 500g", cat:"Mercado", price:34.90, icon:"☕"},
+  {id:11, name:"Chocolate Belga", cat:"Mercado", price:24.90, icon:"🍫"},
+  {id:12, name:"Mochila Urbana", cat:"Moda", price:179.90, icon:"🎒"},
+];
+
+const cart = {}; // id -> qty
+let activeCat = "Todos";
+let query = "";
+
+const brl = n => "R$ " + n.toFixed(2).replace(".", ",");
+
+function renderCats(){
+  const cats = ["Todos", ...new Set(PRODUCTS.map(p=>p.cat))];
+  document.getElementById("cats").innerHTML = cats.map(c =>
+    `<div class="chip ${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</div>`
+  ).join("");
+}
+
+function setCat(c){ activeCat = c; renderCats(); renderGrid(); }
+
+function renderGrid(){
+  const list = PRODUCTS.filter(p =>
+    (activeCat==="Todos" || p.cat===activeCat) &&
+    p.name.toLowerCase().includes(query)
+  );
+  const grid = document.getElementById("grid");
+  if(!list.length){ grid.innerHTML = `<p style="color:var(--muted)">Nenhum produto encontrado.</p>`; return; }
+  grid.innerHTML = list.map(p => `
+    <div class="card">
+      <div class="thumb">${p.icon}</div>
+      <div class="body">
+        <span class="cat">${p.cat}</span>
+        <h3>${p.name}</h3>
+        <div class="price">${brl(p.price)}</div>
+        <button class="add" onclick="addToCart(${p.id})">Adicionar</button>
+      </div>
+    </div>`).join("");
+}
+
+function addToCart(id){ cart[id] = (cart[id]||0) + 1; renderCart(); toggleCart(true); }
+function changeQty(id, d){
+  cart[id] = (cart[id]||0) + d;
+  if(cart[id] <= 0) delete cart[id];
+  renderCart();
+}
+
+function renderCart(){
+  const ids = Object.keys(cart);
+  const count = ids.reduce((s,id)=>s+cart[id],0);
+  document.getElementById("badge").textContent = count;
+  const itemsEl = document.getElementById("items");
+  if(!ids.length){
+    itemsEl.innerHTML = `<p class="empty">Seu carrinho está vazio 🛒</p>`;
+    document.getElementById("total").textContent = brl(0);
+    return;
+  }
+  let total = 0;
+  itemsEl.innerHTML = ids.map(id => {
+    const p = PRODUCTS.find(x=>x.id==id);
+    const sub = p.price * cart[id];
+    total += sub;
+    return `<div class="item">
+      <div class="ic">${p.icon}</div>
+      <div class="meta"><h4>${p.name}</h4><small>${brl(p.price)}</small></div>
+      <div class="qty">
+        <button onclick="changeQty(${id},-1)">−</button>
+        <span>${cart[id]}</span>
+        <button onclick="changeQty(${id},1)">+</button>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("total").textContent = brl(total);
+}
+
+function toggleCart(open){
+  document.getElementById("drawer").classList.toggle("open", open);
+  document.getElementById("overlay").classList.toggle("open", open);
+}
+
+function checkout(){
+  if(!Object.keys(cart).length){ alert("Seu carrinho está vazio!"); return; }
+  const total = Object.keys(cart).reduce((s,id)=> s + PRODUCTS.find(x=>x.id==id).price*cart[id], 0);
+  alert("✅ Pedido confirmado!\nTotal: " + brl(total) + "\n\nObrigado por comprar na Lojinha do Araújo!");
+  for(const k in cart) delete cart[k];
+  renderCart(); toggleCart(false);
+}
+
+document.getElementById("search").addEventListener("input", e => {
+  query = e.target.value.toLowerCase().trim();
+  renderGrid();
+});
+
+renderCats(); renderGrid(); renderCart();
+</script>
+</body>
+</html>
